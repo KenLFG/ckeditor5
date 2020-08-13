@@ -427,10 +427,10 @@ export default class DowncastWriter {
 	}
 
 	/**
-	 * Breaks attribute nodes at provided position or at boundaries of provided range. It breaks attribute elements inside
-	 * up to a container element.
+	 * Breaks attribute elements at provided position or at boundaries of a provided range. It breaks attribute elements
+	 * up to their first ancestor that is a container element.
 	 *
-	 * In following examples `<p>` is a container, `<b>` and `<u>` are attribute nodes:
+	 * In following examples `<p>` is a container, `<b>` and `<u>` are attribute elements:
 	 *
 	 *		<p>foo<b><u>bar{}</u></b></p> -> <p>foo<b><u>bar</u></b>[]</p>
 	 *		<p>foo<b><u>{}bar</u></b></p> -> <p>foo{}<b><u>bar</u></b></p>
@@ -685,7 +685,10 @@ export default class DowncastWriter {
 			 *
 			 * @error view-writer-invalid-position-container
 			 */
-			throw new CKEditorError( 'view-writer-invalid-position-container', this.document );
+			throw new CKEditorError(
+				'view-writer-invalid-position-container: Position\'s parent container cannot be found.',
+				this.document
+			);
 		}
 
 		const insertionPosition = this._breakAttributes( position, true );
@@ -872,7 +875,10 @@ export default class DowncastWriter {
 	 */
 	wrap( range, attribute ) {
 		if ( !( attribute instanceof AttributeElement ) ) {
-			throw new CKEditorError( 'view-writer-wrap-invalid-attribute', this.document );
+			throw new CKEditorError(
+				'view-writer-wrap-invalid-attribute: DowncastWriter#wrap() must be called with an attribute element.',
+				this.document
+			);
 		}
 
 		validateRangeContainer( range, this.document );
@@ -913,11 +919,15 @@ export default class DowncastWriter {
 	unwrap( range, attribute ) {
 		if ( !( attribute instanceof AttributeElement ) ) {
 			/**
-			 * Attribute element need to be instance of attribute element.
+			 * The `attribute` passed to {@link module:engine/view/downcastwriter~DowncastWriter#unwrap `DowncastWriter#unwrap()`}
+			 * must be an instance of {@link module:engine/view/attributeelement~AttributeElement `AttributeElement`}.
 			 *
 			 * @error view-writer-unwrap-invalid-attribute
 			 */
-			throw new CKEditorError( 'view-writer-unwrap-invalid-attribute', this.document );
+			throw new CKEditorError(
+				'view-writer-unwrap-invalid-attribute: DowncastWriter#unwrap() must be called with an attribute element.',
+				this.document
+			);
 		}
 
 		validateRangeContainer( range, this.document );
@@ -1593,31 +1603,43 @@ export default class DowncastWriter {
 		// If position is placed inside EmptyElement - throw an exception as we cannot break inside.
 		if ( position.parent.is( 'emptyElement' ) ) {
 			/**
-			 * Cannot break inside EmptyElement instance.
+			 * Cannot break an `EmptyElement` instance.
+			 *
+			 * This error is thrown if
+			 * {@link module:engine/view/downcastwriter~DowncastWriter#breakAttributes `DowncastWriter#breakAttributes()`}
+			 * was executed in an incorrect position.
 			 *
 			 * @error view-writer-cannot-break-empty-element
 			 */
-			throw new CKEditorError( 'view-writer-cannot-break-empty-element', this.document );
+			throw new CKEditorError( 'view-writer-cannot-break-empty-element: Cannot break an EmptyElement instance.', this.document );
 		}
 
 		// If position is placed inside UIElement - throw an exception as we cannot break inside.
 		if ( position.parent.is( 'uiElement' ) ) {
 			/**
-			 * Cannot break inside UIElement instance.
+			 * Cannot break a `UIElement` instance.
+			 *
+			 * This error is thrown if
+			 * {@link module:engine/view/downcastwriter~DowncastWriter#breakAttributes `DowncastWriter#breakAttributes()`}
+			 * was executed in an incorrect position.
 			 *
 			 * @error view-writer-cannot-break-ui-element
 			 */
-			throw new CKEditorError( 'view-writer-cannot-break-ui-element', this.document );
+			throw new CKEditorError( 'view-writer-cannot-break-ui-element: Cannot break a UIElement instance.', this.document );
 		}
 
 		// If position is placed inside RawElement - throw an exception as we cannot break inside.
 		if ( position.parent.is( 'rawElement' ) ) {
 			/**
-			 * Cannot break inside RawElement instance.
+			 * Cannot break a `RawElement` instance.
+			 *
+			 * This error is thrown if
+			 * {@link module:engine/view/downcastwriter~DowncastWriter#breakAttributes `DowncastWriter#breakAttributes()`}
+			 * was executed in an incorrect position.
 			 *
 			 * @error view-writer-cannot-break-raw-element
 			 */
-			throw new CKEditorError( 'view-writer-cannot-break-raw-element: Cannot break inside a RawElement instance.', this.document );
+			throw new CKEditorError( 'view-writer-cannot-break-raw-element: Cannot break a RawElement instance.', this.document );
 		}
 
 		// There are no attributes to break and text nodes breaking is not forced.
@@ -1770,7 +1792,8 @@ function _hasNonUiChildren( parent ) {
 }
 
 /**
- * Attribute element need to be instance of attribute element.
+ * The `attribute` passed to {@link module:engine/view/downcastwriter~DowncastWriter#wrap `DowncastWriter#wrap()`}
+ * must be an instance of {@link module:engine/view/attributeelement~AttributeElement `AttributeElement`}.
  *
  * @error view-writer-wrap-invalid-attribute
  */
